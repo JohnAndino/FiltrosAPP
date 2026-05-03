@@ -1,4 +1,6 @@
 import filtros.FiltrosARGB;
+import filtros.HSV.FiltrosHSV;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -24,9 +26,12 @@ public class Main {
     // Variables vitales para los filtros en tiempo real
     private BufferedImage imagenOriginal;
     private BufferedImage imagenModificada;
+    private  BufferedImage imgkevin;
 
     //Instancias
     FiltrosARGB fil = new FiltrosARGB();
+
+
 
     public static void main(String[] args) {
         try {
@@ -103,7 +108,7 @@ public class Main {
 
         // Categorias
         agregarCategoria("Filtros ARGB", new String[]{"Gris", "Negativo", "Brillo"});
-        agregarCategoria("Filtros HSV", new String[]{"Saturación", "Tono"});
+        agregarCategoria("Filtros HSV", new String[]{"Calido", "Frio", "Pastel","Vintage","Neon"});
         agregarCategoria("Convolucionales", new String[]{"Blur", "Sobel", "Sharpen"});
 
         ventana.addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -118,12 +123,12 @@ public class Main {
         ventana.setVisible(true);
     }
 
-    // Método auxiliar para crear las categorías colapsables o secciones
+    // Metodo auxiliar para crear las categorías colapsables o secciones
     private void agregarCategoria(String nombre, String[] filtros) {
         // Botón de la Categoría
         JButton btnCategoria = new JButton("▼ " + nombre);
         btnCategoria.setAlignmentX(Component.LEFT_ALIGNMENT); // Alineación a la izquierda
-        btnCategoria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30)); // Que ocupe todo el ancho
+        btnCategoria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30)); // que ocupe todo el ancho
         btnCategoria.setBorderPainted(false); // Opcional: para un look más limpio
         btnCategoria.setContentAreaFilled(false);
         btnCategoria.setHorizontalAlignment(SwingConstants.LEFT); // Texto del botón a la izquierda
@@ -142,7 +147,16 @@ public class Main {
             btnF.setHorizontalAlignment(SwingConstants.LEFT); // Texto a la izquierda
 
             //Funcionalidad de los botones en las categorias
-            if(f.equals("Gris")) btnF.addActionListener(e -> filtroGris());
+            if(f.equals("Gris")){
+                btnF.addActionListener(e -> filtroGris());
+            } else if(f.equals("Calido")){
+                btnF.addActionListener(e -> filtroCalidoHsv());
+            } else if (f.equals("Frio")) {
+                btnF.addActionListener(e -> filtroFrioHsv());
+            } else if (f.equals("Pastel")) {
+                btnF.addActionListener(e -> filtroPastelHsv());
+            }
+
             subPanel.add(btnF);
         }
 
@@ -234,6 +248,28 @@ public class Main {
             actualizarVista(imagenModificada);
         }
     }
+    private  void filtroCalidoHsv(){
+        if(imagenModificada != null) {
+           // imagenModificada = fil.filtroGris(imagenModificada);
+            imagenModificada = FiltrosHSV.filtroCalido(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+    private void filtroFrioHsv(){
+        if(imagenModificada != null) {
+            // imagenModificada = fil.filtroGris(imagenModificada);
+            imagenModificada = FiltrosHSV.filtroFrio(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+    private void filtroPastelHsv(){
+        if(imagenModificada != null) {
+            // imagenModificada = fil.filtroGris(imagenModificada);
+            imagenModificada = FiltrosHSV.filtroPastel(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+
 
     private void actualizarVista(BufferedImage img) {
         if (img != null) {
