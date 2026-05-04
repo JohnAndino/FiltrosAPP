@@ -7,7 +7,7 @@ public class FiltrosARGB {
     public FiltrosARGB(){
     }
 
-    public BufferedImage filtroGris(BufferedImage img) {
+    public static BufferedImage filtroGris(BufferedImage img) {
         int a, r, g, b;
         int pixel;
         int mascara = 0xFF;

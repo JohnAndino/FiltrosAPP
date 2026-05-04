@@ -1,4 +1,5 @@
 import filtros.FiltrosARGB;
+import filtros.Convolucion.FiltrosConvolucionales;
 import filtros.HSV.FiltrosHSV;
 
 import javax.imageio.ImageIO;
@@ -109,7 +110,7 @@ public class Main {
         // Categorias
         agregarCategoria("Filtros ARGB", new String[]{"Gris", "Negativo", "Brillo"});
         agregarCategoria("Filtros HSV", new String[]{"Calido", "Frio", "Pastel","Vintage","Neon"});
-        agregarCategoria("Convolucionales", new String[]{"Blur", "Sobel", "Sharpen"});
+        agregarCategoria("Convolucionales", new String[]{"Blur", "Sharpen o Enfoque", "Detección de Bordes", "Aclarar", "Obscurecer", "Relieve", "Realzar Bordes"});
 
         ventana.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent e) {
@@ -155,6 +156,22 @@ public class Main {
                 btnF.addActionListener(e -> filtroFrioHsv());
             } else if (f.equals("Pastel")) {
                 btnF.addActionListener(e -> filtroPastelHsv());
+            }
+            // metodos Convolusionales
+            else if (f.equals("Blur")) {
+                btnF.addActionListener(e -> filtroBlurCv());
+            } else if (f.equals("Sharpen o Enfoque")) {
+                btnF.addActionListener(e -> filtroSharpenCv());
+            } else if (f.equals("Detección de Bordes")) {
+                btnF.addActionListener(e -> filtroDeteccionBordesCv());
+            } else if (f.equals("Aclarar")) {
+                btnF.addActionListener(e -> filtroAclararCv());
+            } else if (f.equals("Obscurecer")) {
+                btnF.addActionListener(e -> filtroObscurecerCv());
+            } else if (f.equals("Relieve")) {
+                btnF.addActionListener(e -> filtroRelieveCv());
+            } else if (f.equals("Realzar Bordes")) {
+                btnF.addActionListener(e -> filtroRealzarBordesCv());
             }
 
             subPanel.add(btnF);
@@ -244,7 +261,7 @@ public class Main {
 
     private void filtroGris(){
         if(imagenModificada != null) {
-            imagenModificada = fil.filtroGris(imagenModificada);
+            imagenModificada = FiltrosARGB.filtroGris(imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
@@ -266,6 +283,49 @@ public class Main {
         if(imagenModificada != null) {
             // imagenModificada = fil.filtroGris(imagenModificada);
             imagenModificada = FiltrosHSV.filtroPastel(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+
+    private void filtroBlurCv(){
+        if(imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Blur",imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+    private void filtroSharpenCv(){
+        if(imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Sharpen",imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+    private void filtroDeteccionBordesCv(){
+        if(imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("DeteccionBordes",imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+    private void filtroAclararCv(){
+        if(imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Aclarar",imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+    private void filtroObscurecerCv(){
+        if(imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Obscurecer",imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+    private void filtroRelieveCv(){
+        if(imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Relieve",imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+    private void filtroRealzarBordesCv(){
+        if(imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Realzar Bordes",imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
