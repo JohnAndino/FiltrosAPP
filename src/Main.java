@@ -117,7 +117,7 @@ public class Main {
         ventana.add(panelControles, BorderLayout.SOUTH);
 
         // Categorias
-        agregarCategoria("Filtros ARGB", new String[]{"Gris", "Negativo", "Brillo"});
+        agregarCategoria("Filtros ARGB", new String[]{"Gris", "Negativo", "Brillo", "Vidrio Esmerilado", "Desvanecimiento Circular", "Efecto Retro", "Blanco y Negro"});
         agregarCategoria("Filtros HSV", new String[]{"Calido", "Frio", "Pastel", "Vintage", "Neon"});
         agregarCategoria("Convolucionales", new String[]{"Blur", "Sharpen o Enfoque", "Detección de Bordes", "Aclarar", "Obscurecer", "Relieve", "Realzar Bordes"});
 
@@ -163,6 +163,14 @@ public class Main {
                 btnF.addActionListener(e -> filtroBrillo());
             } else if (f.equals("Negativo")) {
                 btnF.addActionListener(e -> filtroNegativo());
+            } else if (f.equals("Vidrio Esmerilado")) {
+                btnF.addActionListener(e -> filtroVidrioEsmerilado());
+            } else if (f.equals("Desvanecimiento Circular")) {
+                btnF.addActionListener(e -> filtroDesvanecimientoCircular());
+            } else if (f.equals("Efecto Retro")) {
+                btnF.addActionListener(e -> filtroEfectoRetro());
+            } else if (f.equals("Blanco y Negro")) {
+                btnF.addActionListener(e -> filtroBlancoNegro());
             } else if (f.equals("Calido")) {
                 btnF.addActionListener(e -> filtroCalidoHsv());
             } else if (f.equals("Frio")) {
@@ -289,6 +297,34 @@ public class Main {
     private void filtroBrillo() {
         if (imagenModificada != null) {
             imagenModificada = FiltrosARGB.filtroBrillo(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+
+    private void filtroVidrioEsmerilado() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosARGB.filtroVidrioEsmerilado(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+
+    private void filtroDesvanecimientoCircular() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosARGB.filtroDesvanecimientoCircular(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+
+    private void filtroEfectoRetro() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosARGB.filtroEfectoRetro(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+
+    private void filtroBlancoNegro() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosARGB.filtroBlancoNegro(imagenModificada);
             actualizarVista(imagenModificada);
         }
     }

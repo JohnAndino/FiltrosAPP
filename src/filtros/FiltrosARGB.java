@@ -10,6 +10,182 @@ public class FiltrosARGB {
     public FiltrosARGB() {
     }
 
+    public static BufferedImage filtroBlancoNegro(BufferedImage img) {
+        int ancho, alto, pixel, pixelNuevo;
+        int r = 0, g = 0, b = 0, a = 0;
+        int mascara = 0xFF;
+        int brillo, color;
+
+        try {
+
+            ancho = img.getWidth();
+            alto = img.getHeight();
+
+            BufferedImage buffer = new BufferedImage(ancho, alto, BufferedImage.TYPE_INT_ARGB);
+
+            for (int y = 0; y < alto; y++) {
+                for (int x = 0; x < ancho; x++) {
+
+                    pixel = img.getRGB(x, y);
+
+                    a = (pixel >> 24) & mascara;
+                    r = (pixel >> 16) & mascara;
+                    g = (pixel >> 8) & mascara;
+                    b = (pixel >> 0) & mascara;
+
+                    brillo = (r + g + b) / 3;
+
+                    if (brillo > 127) {
+                        color = 255;
+                    } else {
+                        color = 0;
+                    }
+                    pixelNuevo = (a << 24) | (color << 16) | (color << 8) | (color << 0);
+
+                    buffer.setRGB(x, y, pixelNuevo);
+
+                }
+            }
+
+            return buffer;
+
+        } catch (Exception e) {
+            System.out.println("No se pudo aplicar el filtro para el Efecto Blanco y Negro");
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static BufferedImage filtroEfectoRetro(BufferedImage img) {
+        int ancho, alto, pixel, pixelNuevo;
+        int r = 0, g = 0, b = 0, a = 0;
+        int mascara = 0xFF;
+        int brillo;
+        int n = 4;
+
+        try {
+
+            ancho = img.getWidth();
+            alto = img.getHeight();
+
+            BufferedImage buffer = new BufferedImage(ancho, alto, BufferedImage.TYPE_INT_ARGB);
+
+            for (int y = 0; y < alto; y++) {
+                for (int x = 0; x < ancho; x++) {
+
+                    pixel = img.getRGB(x, y);
+
+                    a = (pixel >> 24) & mascara;
+                    r = (pixel >> 16) & mascara;
+                    g = (pixel >> 8) & mascara;
+                    b = (pixel >> 0) & mascara;
+
+                    r = (r / (256 / n)) * (255 / (n - 1));
+                    g = (g / (256 / n)) * (255 / (n - 1));
+                    b = (b / (256 / n)) * (255 / (n - 1));
+
+                    pixelNuevo = (a << 24) | (r << 16) | (g << 8) | (b << 0);
+
+                    buffer.setRGB(x, y, pixelNuevo);
+
+                }
+            }
+
+            return buffer;
+
+        } catch (Exception e) {
+            System.out.println("No se pudo aplicar el filtro para el Efecto Retro");
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static BufferedImage filtroDesvanecimientoCircular(BufferedImage img) {
+        int ancho, alto, pixel, pixelNuevo;
+        int r = 0, g = 0, b = 0, a = 0;
+        int mascara = 0xFF;
+        int brillo;
+
+        try {
+
+            ancho = img.getWidth();
+            alto = img.getHeight();
+
+            int centroX = ancho / 2;
+            int centroY = alto / 2;
+            double distMax = Math.sqrt(centroX * centroX + centroY * centroY);
+
+            BufferedImage buffer = new BufferedImage(ancho, alto, BufferedImage.TYPE_INT_ARGB);
+
+            for (int y = 0; y < alto; y++) {
+                for (int x = 0; x < ancho; x++) {
+
+                    pixel = img.getRGB(x, y);
+
+                    a = (pixel >> 24) & mascara;
+                    r = (pixel >> 16) & mascara;
+                    g = (pixel >> 8) & mascara;
+                    b = (pixel >> 0) & mascara;
+
+                    double dist = Math.sqrt((x - centroX) * (x - centroX) + (y - centroY) * (y - centroY));
+
+                    a = (int) ((distMax - dist) * 255 / distMax);
+
+                    pixelNuevo = (a << 24) | (r << 16) | (g << 8) | (b << 0);
+
+                    buffer.setRGB(x, y, pixelNuevo);
+
+                }
+            }
+
+            return buffer;
+
+        } catch (Exception e) {
+            System.out.println("No se pudo aplicar el filtro para el Desvanecimiento Circular");
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static BufferedImage filtroVidrioEsmerilado(BufferedImage img) {
+        int ancho, alto, pixel, pixelNuevo;
+        int r = 0, g = 0, b = 0, a = 0;
+        int mascara = 0xFF;
+        int brillo;
+
+        try {
+
+            ancho = img.getWidth();
+            alto = img.getHeight();
+
+            BufferedImage buffer = new BufferedImage(ancho, alto, BufferedImage.TYPE_INT_ARGB);
+
+            for (int y = 0; y < alto; y++) {
+                for (int x = 0; x < ancho; x++) {
+
+                    pixel = img.getRGB(x, y);
+
+                    a = (pixel >> 24) & mascara;
+                    r = (pixel >> 16) & mascara;
+                    g = (pixel >> 8) & mascara;
+                    b = (pixel >> 0) & mascara;
+
+                    brillo = (r + g + b) / 3;
+
+                    a = 50 + (brillo * (255 - 50)) / 255;
+
+                    pixelNuevo = (a << 24) | (r << 16) | (g << 8) | (b << 0);
+
+                    buffer.setRGB(x, y, pixelNuevo);
+
+                }
+            }
+
+            return buffer;
+
+        } catch (Exception e) {
+            System.out.println("No se pudo aplicar el filtro para el Efecto Vidrio Esmerilado");
+            throw new RuntimeException(e);
+        }
+    }
+
     public static BufferedImage filtroBrillo(BufferedImage img) {
         int ancho, alto, pixel, pixelNuevo;
         int r = 0, g = 0, b = 0, a = 0;
