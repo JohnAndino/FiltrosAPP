@@ -27,12 +27,10 @@ public class Main {
     // Variables vitales para los filtros en tiempo real
     private BufferedImage imagenOriginal;
     private BufferedImage imagenModificada;
-    private  BufferedImage imgkevin;
+    private BufferedImage imgkevin;
 
     //Instancias
     FiltrosARGB fil = new FiltrosARGB();
-
-
 
     public static void main(String[] args) {
         try {
@@ -102,14 +100,25 @@ public class Main {
             ventana.revalidate(); // Refresca la interfaz para mostrar/ocultar el panel
         });
 
+        JButton btnRestaurar = new JButton("Imagen Original");
+        btnRestaurar.addActionListener(e -> {
+            if (imagenOriginal != null) {
+                imagenModificada = imagenOriginal;
+                actualizarVista(imagenModificada);
+            } else {
+                JOptionPane.showMessageDialog(ventana, "No hay ninguna imagen cargada para restaurar.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
         panelControles.add(btnCargar);
         panelControles.add(btnGuardar);
         panelControles.add(btnMenuFiltros);
+        panelControles.add(btnRestaurar);
         ventana.add(panelControles, BorderLayout.SOUTH);
 
         // Categorias
         agregarCategoria("Filtros ARGB", new String[]{"Gris", "Negativo", "Brillo"});
-        agregarCategoria("Filtros HSV", new String[]{"Calido", "Frio", "Pastel","Vintage","Neon"});
+        agregarCategoria("Filtros HSV", new String[]{"Calido", "Frio", "Pastel", "Vintage", "Neon"});
         agregarCategoria("Convolucionales", new String[]{"Blur", "Sharpen o Enfoque", "Detección de Bordes", "Aclarar", "Obscurecer", "Relieve", "Realzar Bordes"});
 
         ventana.addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -148,9 +157,13 @@ public class Main {
             btnF.setHorizontalAlignment(SwingConstants.LEFT); // Texto a la izquierda
 
             //Funcionalidad de los botones en las categorias
-            if(f.equals("Gris")){
+            if (f.equals("Gris")) {
                 btnF.addActionListener(e -> filtroGris());
-            } else if(f.equals("Calido")){
+            } else if (f.equals("Brillo")) {
+                btnF.addActionListener(e -> filtroBrillo());
+            } else if (f.equals("Negativo")) {
+                btnF.addActionListener(e -> filtroNegativo());
+            } else if (f.equals("Calido")) {
                 btnF.addActionListener(e -> filtroCalidoHsv());
             } else if (f.equals("Frio")) {
                 btnF.addActionListener(e -> filtroFrioHsv());
@@ -259,73 +272,96 @@ public class Main {
         }
     }
 
-    private void filtroGris(){
-        if(imagenModificada != null) {
+    private void filtroGris() {
+        if (imagenModificada != null) {
             imagenModificada = FiltrosARGB.filtroGris(imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
-    private  void filtroCalidoHsv(){
-        if(imagenModificada != null) {
-           // imagenModificada = fil.filtroGris(imagenModificada);
+
+    private void filtroNegativo() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosARGB.filtroNegativo(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+
+    private void filtroBrillo() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosARGB.filtroBrillo(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+
+    private void filtroCalidoHsv() {
+        if (imagenModificada != null) {
+            // imagenModificada = fil.filtroGris(imagenModificada);
             imagenModificada = FiltrosHSV.filtroCalido(imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
-    private void filtroFrioHsv(){
-        if(imagenModificada != null) {
+
+    private void filtroFrioHsv() {
+        if (imagenModificada != null) {
             // imagenModificada = fil.filtroGris(imagenModificada);
             imagenModificada = FiltrosHSV.filtroFrio(imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
-    private void filtroPastelHsv(){
-        if(imagenModificada != null) {
+
+    private void filtroPastelHsv() {
+        if (imagenModificada != null) {
             // imagenModificada = fil.filtroGris(imagenModificada);
             imagenModificada = FiltrosHSV.filtroPastel(imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
 
-    private void filtroBlurCv(){
-        if(imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Blur",imagenModificada);
+    private void filtroBlurCv() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Blur", imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
-    private void filtroSharpenCv(){
-        if(imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Sharpen",imagenModificada);
+
+    private void filtroSharpenCv() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Sharpen", imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
-    private void filtroDeteccionBordesCv(){
-        if(imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("DeteccionBordes",imagenModificada);
+
+    private void filtroDeteccionBordesCv() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("DeteccionBordes", imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
-    private void filtroAclararCv(){
-        if(imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Aclarar",imagenModificada);
+
+    private void filtroAclararCv() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Aclarar", imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
-    private void filtroObscurecerCv(){
-        if(imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Obscurecer",imagenModificada);
+
+    private void filtroObscurecerCv() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Obscurecer", imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
-    private void filtroRelieveCv(){
-        if(imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Relieve",imagenModificada);
+
+    private void filtroRelieveCv() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Relieve", imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
-    private void filtroRealzarBordesCv(){
-        if(imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Realzar Bordes",imagenModificada);
+
+    private void filtroRealzarBordesCv() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Realzar Bordes", imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
@@ -340,18 +376,18 @@ public class Main {
             int altoCont = ventana.getContentPane().getHeight() - panelControles.getHeight();
 
             int nuevoAlto, nuevoAncho;
-            double arImg = (double) img.getWidth()/img.getHeight();
-            double arCont = (double) anchoCont/altoCont;
+            double arImg = (double) img.getWidth() / img.getHeight();
+            double arCont = (double) anchoCont / altoCont;
 
-            if (arImg > arCont){
+            if (arImg > arCont) {
                 nuevoAncho = anchoCont;
-                nuevoAlto = (int) (anchoCont/arImg);
+                nuevoAlto = (int) (anchoCont / arImg);
             } else {
                 nuevoAlto = altoCont;
-                nuevoAncho = (int) (altoCont*arImg);
+                nuevoAncho = (int) (altoCont * arImg);
             }
 
-            Image imgEscalada = img.getScaledInstance(nuevoAncho,nuevoAlto,Image.SCALE_SMOOTH);
+            Image imgEscalada = img.getScaledInstance(nuevoAncho, nuevoAlto, Image.SCALE_SMOOTH);
             etiquetaImagen.setIcon(new ImageIcon(imgEscalada));
             ventana.revalidate();
             ventana.repaint();
