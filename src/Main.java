@@ -1,5 +1,6 @@
 import filtros.FiltrosARGB;
 import filtros.Convolucion.FiltrosConvolucionales;
+import filtros.HSV.FiltrosBasicosHSV;
 import filtros.HSV.FiltrosHSV;
 
 import javax.imageio.ImageIO;
@@ -126,7 +127,7 @@ public class Main {
 
         // Categorias
         agregarCategoria("Filtros ARGB", new String[]{"Gris", "Negativo", "Brillo", "Vidrio Esmerilado", "Desvanecimiento Circular", "Efecto Retro", "Blanco y Negro"});
-        agregarCategoria("Filtros HSV", new String[]{"Calido", "Frio", "Pastel", "Vintage", "Neon"});
+        agregarCategoria("Filtros HSV", new String[]{"Mas saturacion", "Menos saturacion", "Mas brillo", "Menos brillo", "Tonalidad"});
         agregarCategoria("Convolucionales", new String[]{"Blur", "Sharpen o Enfoque", "Detección de Bordes", "Aclarar", "Obscurecer", "Relieve", "Realzar Bordes"});
 
         ventana.addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -189,12 +190,18 @@ public class Main {
                 btnF.addActionListener(e -> filtroEfectoRetro());
             } else if (f.equals("Blanco y Negro")) {
                 btnF.addActionListener(e -> filtroBlancoNegro());
-            } else if (f.equals("Calido")) {
-                btnF.addActionListener(e -> filtroCalidoHsv());
-            } else if (f.equals("Frio")) {
-                btnF.addActionListener(e -> filtroFrioHsv());
-            } else if (f.equals("Pastel")) {
-                btnF.addActionListener(e -> filtroPastelHsv());
+
+            // HSV
+            } else if (f.equals("Mas saturacion")) {
+                btnF.addActionListener(e -> filtroMasSaturacionHsv());
+            } else if (f.equals("Menos saturacion")) {
+                btnF.addActionListener(e -> filtroMenosSaturacionHsv());
+            } else if (f.equals("Mas brillo")) {
+                btnF.addActionListener(e -> filtroMasBrilloHsv());
+            } else if (f.equals("Menos brillo")) {
+                btnF.addActionListener(e -> filtroMenosBrilloHsv());
+            } else if (f.equals("Tonalidad")) {
+                btnF.addActionListener(e -> filtroTonalidadHsv());
             }
             // metodos Convolusionales
             else if (f.equals("Blur")) {
@@ -350,23 +357,35 @@ public class Main {
         }
     }
 
-    private void filtroCalidoHsv() {
+    private void filtroMasSaturacionHsv() {
         if (imagenModificada != null) {
-            imagenModificada = FiltrosHSV.filtroCalido(imagenModificada);
+            imagenModificada = FiltrosBasicosHSV.masSaturacion(imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
 
-    private void filtroFrioHsv() {
+    private void filtroMenosSaturacionHsv() {
         if (imagenModificada != null) {
-            imagenModificada = FiltrosHSV.filtroFrio(imagenModificada);
+            imagenModificada = FiltrosBasicosHSV.menosSaturacion(imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
 
-    private void filtroPastelHsv() {
+    private void filtroMasBrilloHsv() {
         if (imagenModificada != null) {
-            imagenModificada = FiltrosHSV.filtroPastel(imagenModificada);
+            imagenModificada = FiltrosBasicosHSV.masBrillo(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+    private void filtroMenosBrilloHsv() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosBasicosHSV.menosBrillo(imagenModificada);
+            actualizarVista(imagenModificada);
+        }
+    }
+    private void filtroTonalidadHsv() {
+        if (imagenModificada != null) {
+            imagenModificada = FiltrosBasicosHSV.cambioTonalidad(imagenModificada);
             actualizarVista(imagenModificada);
         }
     }
