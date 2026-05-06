@@ -55,12 +55,11 @@ public class FiltrosARGB {
         }
     }
 
-    public static BufferedImage filtroEfectoRetro(BufferedImage img) {
+    public static BufferedImage filtroEfectoRetro(BufferedImage img, int valor) {
         int ancho, alto, pixel, pixelNuevo;
         int r = 0, g = 0, b = 0, a = 0;
         int mascara = 0xFF;
         int brillo;
-        int n = 4;
 
         try {
 
@@ -79,9 +78,9 @@ public class FiltrosARGB {
                     g = (pixel >> 8) & mascara;
                     b = (pixel >> 0) & mascara;
 
-                    r = (r / (256 / n)) * (255 / (n - 1));
-                    g = (g / (256 / n)) * (255 / (n - 1));
-                    b = (b / (256 / n)) * (255 / (n - 1));
+                    r = (r / (256 / valor)) * (255 / (valor - 1));
+                    g = (g / (256 / valor)) * (255 / (valor - 1));
+                    b = (b / (256 / valor)) * (255 / (valor - 1));
 
                     pixelNuevo = (a << 24) | (r << 16) | (g << 8) | (b << 0);
 
@@ -186,11 +185,10 @@ public class FiltrosARGB {
         }
     }
 
-    public static BufferedImage filtroBrillo(BufferedImage img) {
+    public static BufferedImage filtroBrillo(BufferedImage img, int brillo) {
         int ancho, alto, pixel, pixelNuevo;
         int r = 0, g = 0, b = 0, a = 0;
         int mascara = 0xFF;
-        int brillo = 100;
 
         try {
 

@@ -24,6 +24,9 @@ public class Main {
     private JPanel panelListaFiltros;
     private JPanel panelParametros;
 
+    // --- NUEVA VARIABLE PARA EL PARÁMETRO ---
+    private JTextField campoValor;
+
     // Variables vitales para los filtros en tiempo real
     private BufferedImage imagenOriginal;
     private BufferedImage imagenModificada;
@@ -35,7 +38,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             // Aquí eliges el sabor: FlatDarkLaf (Oscuro) o FlatLightLaf (Claro)
-            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatIntelliJLaf());
+            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatDarculaLaf());
         } catch (Exception ex) {
             System.err.println("Fallo al inicializar el tema");
         }
@@ -53,7 +56,7 @@ public class Main {
         // 1. ZONA CENTRAL: Imagen
         etiquetaImagen = new JLabel("Haz clic en 'Cargar Imagen' para empezar", SwingConstants.CENTER);
         etiquetaImagen.setOpaque(true);
-        etiquetaImagen.setBackground(Color.LIGHT_GRAY);
+        etiquetaImagen.setBackground(Color.BLACK);
         etiquetaImagen.setHorizontalAlignment(JLabel.CENTER);
         etiquetaImagen.setVerticalAlignment(JLabel.CENTER);
 
@@ -74,11 +77,16 @@ public class Main {
         JScrollPane scrollFiltros = new JScrollPane(panelListaFiltros);
         scrollFiltros.setBorder(BorderFactory.createTitledBorder("Categorías y Filtros"));
 
-        // Sub-panel inferior: Parámetros
+        // Sub-panel inferior: Parámetros (AQUÍ AGREGAMOS EL INPUT)
         panelParametros = new JPanel();
         panelParametros.setLayout(new FlowLayout());
         panelParametros.setPreferredSize(new Dimension(250, 150));
         panelParametros.setBorder(BorderFactory.createTitledBorder("Parámetros"));
+
+        // Agregamos el campo de texto al panel de parámetros
+        panelParametros.add(new JLabel("Valor (int):"));
+        campoValor = new JTextField("25", 10); // Valor por defecto 50
+        panelParametros.add(campoValor);
 
         panelDerecho.add(scrollFiltros, BorderLayout.CENTER);
         panelDerecho.add(panelParametros, BorderLayout.SOUTH);
@@ -131,6 +139,16 @@ public class Main {
 
         ventana.setLocationRelativeTo(null);
         ventana.setVisible(true);
+    }
+
+    // --- NUEVO MÉTODO AUXILIAR PARA LEER EL PARÁMETRO ---
+    private int getValorInt() {
+        try {
+            return Integer.parseInt(campoValor.getText().trim());
+        } catch (NumberFormatException e) {
+            // Si el usuario pone algo que no es un número, devolvemos un valor seguro
+            return 0;
+        }
     }
 
     // Metodo auxiliar para crear las categorías colapsables o secciones
@@ -204,7 +222,7 @@ public class Main {
         panelListaFiltros.add(subPanel);
     }
 
-    // --- MÉTODOS PREVIOS (SIN CAMBIOS) ---
+    // --- MÉTODOS PREVIOS ---
 
     private void cargarImagenBase() {
         JFileChooser selectorArchivos = new JFileChooser();
@@ -296,13 +314,15 @@ public class Main {
 
     private void filtroBrillo() {
         if (imagenModificada != null) {
-            imagenModificada = FiltrosARGB.filtroBrillo(imagenModificada);
+            // Leemos el valor del campo de texto
+            imagenModificada = FiltrosARGB.filtroBrillo(imagenModificada, getValorInt());
             actualizarVista(imagenModificada);
         }
     }
 
     private void filtroVidrioEsmerilado() {
         if (imagenModificada != null) {
+            // Leemos el valor del campo de texto
             imagenModificada = FiltrosARGB.filtroVidrioEsmerilado(imagenModificada);
             actualizarVista(imagenModificada);
         }
@@ -317,7 +337,8 @@ public class Main {
 
     private void filtroEfectoRetro() {
         if (imagenModificada != null) {
-            imagenModificada = FiltrosARGB.filtroEfectoRetro(imagenModificada);
+            // Leemos el valor del campo de texto
+            imagenModificada = FiltrosARGB.filtroEfectoRetro(imagenModificada, getValorInt());
             actualizarVista(imagenModificada);
         }
     }
@@ -331,7 +352,6 @@ public class Main {
 
     private void filtroCalidoHsv() {
         if (imagenModificada != null) {
-            // imagenModificada = fil.filtroGris(imagenModificada);
             imagenModificada = FiltrosHSV.filtroCalido(imagenModificada);
             actualizarVista(imagenModificada);
         }
@@ -339,7 +359,6 @@ public class Main {
 
     private void filtroFrioHsv() {
         if (imagenModificada != null) {
-            // imagenModificada = fil.filtroGris(imagenModificada);
             imagenModificada = FiltrosHSV.filtroFrio(imagenModificada);
             actualizarVista(imagenModificada);
         }
@@ -347,7 +366,6 @@ public class Main {
 
     private void filtroPastelHsv() {
         if (imagenModificada != null) {
-            // imagenModificada = fil.filtroGris(imagenModificada);
             imagenModificada = FiltrosHSV.filtroPastel(imagenModificada);
             actualizarVista(imagenModificada);
         }
@@ -406,7 +424,6 @@ public class Main {
     private void actualizarVista(BufferedImage img) {
         if (img != null) {
             etiquetaImagen.setText("");
-            // Restamos el ancho del panel derecho si es visible para que la imagen no se recorte
             int anchoOcupado = panelDerecho.isVisible() ? panelDerecho.getWidth() : 0;
             int anchoCont = ventana.getContentPane().getWidth() - anchoOcupado;
             int altoCont = ventana.getContentPane().getHeight() - panelControles.getHeight();
