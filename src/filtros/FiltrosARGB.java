@@ -207,9 +207,9 @@ public class FiltrosARGB {
                     g = (pixel >> 8) & mascara;
                     b = (pixel >> 0) & mascara;
 
-                    r = Math.min(255, (r + brillo));
-                    g = Math.min(255, (g + brillo));
-                    b = Math.min(255, (b + brillo));
+                    r = Math.min(255, Math.max(0, r + brillo));
+                    g = Math.min(255, Math.max(0, g + brillo));
+                    b = Math.min(255, Math.max(0, b + brillo));
 
                     pixelNuevo = (a << 24) | (r << 16) | (g << 8) | (b << 0);
 

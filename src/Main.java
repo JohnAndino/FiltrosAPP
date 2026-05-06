@@ -24,6 +24,7 @@ public class Main {
 
     private BufferedImage imagenOriginal;
     private BufferedImage imagenModificada;
+    private String ultimoFiltroAplicado = "";
 
     public static void main(String[] args) {
         try {
@@ -81,10 +82,22 @@ public class Main {
         JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         inputPanel.add(new JLabel("Intensidad:"));
         campoValor = new JTextField("25", 8);
+
+        // Al presionar ENTER en el cuadro de texto, vuelve a aplicar el filtro automáticamente
+        campoValor.addActionListener(e -> {
+            if (!ultimoFiltroAplicado.isEmpty()) {
+                // Restauramos la original antes de aplicar para no sumar el efecto dos veces
+                imagenModificada = copiarImagen(imagenOriginal);
+                aplicarFiltro(ultimoFiltroAplicado);
+            }
+        });
+
         inputPanel.add(campoValor);
 
         panelParametros.add(inputPanel);
         panelDerecho.add(panelParametros, BorderLayout.SOUTH);
+
+        panelParametros.setVisible(false);
 
         ventana.add(panelDerecho, BorderLayout.EAST);
 
@@ -211,6 +224,14 @@ public class Main {
 
     private void aplicarFiltro(String f) {
         if (imagenModificada == null) return;
+        ultimoFiltroAplicado = f;
+        boolean necesitaParametro = f.equals("Brillo") || f.equals("Efecto Retro");
+
+        if (panelParametros.isVisible() != necesitaParametro) {
+            panelParametros.setVisible(necesitaParametro);
+            panelDerecho.revalidate();
+            panelDerecho.repaint();
+        }
 
         int val = getValorInt();
 

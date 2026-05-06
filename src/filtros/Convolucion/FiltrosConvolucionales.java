@@ -1,5 +1,6 @@
 package filtros.Convolucion;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
@@ -110,16 +111,19 @@ public class FiltrosConvolucionales {
 //    }
 
     public static BufferedImage convoluciones(BufferedImage img) {
-
-        //Un kernel pide el tamaño de la matriz y la matriz quue voy a utilizar
         Kernel kernel = new Kernel(
                 (int)Math.sqrt(matriz.length),
                 (int)Math.sqrt(matriz.length),
                 matriz);
         ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
 
-        BufferedImage destino = op.createCompatibleDestImage(img, img.getColorModel());
-        BufferedImage buffer2 = op.filter(img, null);
+        BufferedImage imgRGB = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics g = imgRGB.getGraphics();
+        g.drawImage(img, 0, 0, null);
+        g.dispose();
+
+        // Aplicamos el filtro sobre la imagen sin canal alfa por eso la transformacion a RGB
+        BufferedImage buffer2 = op.filter(imgRGB, null);
 
         return buffer2;
     }
