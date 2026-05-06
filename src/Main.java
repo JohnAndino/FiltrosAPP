@@ -5,6 +5,7 @@ import filtros.HSV.FiltrosHSV;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -12,457 +13,304 @@ import java.io.File;
 
 public class Main {
 
-    // Variables globales para la interfaz
     private JFrame ventana;
     private JLabel etiquetaImagen;
-    int dimX = 1100, dimY = 700; // Aumentamos un poco el ancho para el panel lateral
-    int anchoCont = dimX;
-    int altoCont = dimY;
-    JPanel panelControles;
-
-    // --- NUEVAS VARIABLES PARA EL PANEL LATERAL ---
+    private int dimX = 1200, dimY = 800;
+    private JPanel panelControles;
     private JPanel panelDerecho;
     private JPanel panelListaFiltros;
     private JPanel panelParametros;
-
-    // --- NUEVA VARIABLE PARA EL PARÁMETRO ---
     private JTextField campoValor;
 
-    // Variables vitales para los filtros en tiempo real
     private BufferedImage imagenOriginal;
     private BufferedImage imagenModificada;
-    private BufferedImage imgkevin;
-
-    //Instancias
-    FiltrosARGB fil = new FiltrosARGB();
 
     public static void main(String[] args) {
         try {
-            // Aquí eliges el sabor: FlatDarkLaf (Oscuro) o FlatLightLaf (Claro)
+            // Usamos el tema Darcula de FlatLaf para un look profesional
             UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatDarculaLaf());
+            // Personalización extra de UI
+            UIManager.put("Button.arc", 15);
+            UIManager.put("Component.arc", 15);
+            UIManager.put("TextComponent.arc", 15);
         } catch (Exception ex) {
             System.err.println("Fallo al inicializar el tema");
         }
-        SwingUtilities.invokeLater(() -> {
-            new Main().crearInterfaz();
-        });
+        SwingUtilities.invokeLater(() -> new Main().crearInterfaz());
     }
 
     public void crearInterfaz() {
-        ventana = new JFrame("Mi Editor de Imágenes");
+        ventana = new JFrame("Procesador de Imágenes Pro");
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ventana.setSize(dimX, dimY);
         ventana.setLayout(new BorderLayout());
 
-        // 1. ZONA CENTRAL: Imagen
-        etiquetaImagen = new JLabel("Haz clic en 'Cargar Imagen' para empezar", SwingConstants.CENTER);
+        // --- ZONA CENTRAL: Visualizador ---
+        etiquetaImagen = new JLabel("Cargue una imagen para comenzar", SwingConstants.CENTER);
+        etiquetaImagen.setFont(new Font("SansSerif", Font.BOLD, 16));
+        etiquetaImagen.setForeground(Color.GRAY);
         etiquetaImagen.setOpaque(true);
-        etiquetaImagen.setBackground(Color.BLACK);
-        etiquetaImagen.setHorizontalAlignment(JLabel.CENTER);
-        etiquetaImagen.setVerticalAlignment(JLabel.CENTER);
+        etiquetaImagen.setBackground(new Color(30, 30, 30));
 
         JScrollPane panelScroll = new JScrollPane(etiquetaImagen);
+        panelScroll.setBorder(null);
         ventana.add(panelScroll, BorderLayout.CENTER);
 
-        // 2. ZONA DERECHA: Menú de Filtros y Parámetros (Inicialmente oculto)
-        panelDerecho = new JPanel();
-        panelDerecho.setLayout(new BorderLayout());
-        panelDerecho.setPreferredSize(new Dimension(250, 0));
-        panelDerecho.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, Color.GRAY));
-        panelDerecho.setVisible(false); // Oculto hasta presionar "Filtros"
+        // --- ZONA DERECHA: Panel de Herramientas ---
+        panelDerecho = new JPanel(new BorderLayout());
+        panelDerecho.setPreferredSize(new Dimension(280, 0));
+        panelDerecho.setBackground(new Color(45, 45, 45));
+        panelDerecho.setVisible(false);
 
-        // Sub-panel superior: Lista de filtros con Scroll
+        // Lista de Filtros
         panelListaFiltros = new JPanel();
         panelListaFiltros.setLayout(new BoxLayout(panelListaFiltros, BoxLayout.Y_AXIS));
-        panelListaFiltros.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelListaFiltros.setBorder(new EmptyBorder(10, 10, 10, 10));
+
         JScrollPane scrollFiltros = new JScrollPane(panelListaFiltros);
-        scrollFiltros.setBorder(BorderFactory.createTitledBorder("Categorías y Filtros"));
-
-        // Sub-panel inferior: Parámetros (AQUÍ AGREGAMOS EL INPUT)
-        panelParametros = new JPanel();
-        panelParametros.setLayout(new FlowLayout());
-        panelParametros.setPreferredSize(new Dimension(250, 150));
-        panelParametros.setBorder(BorderFactory.createTitledBorder("Parámetros"));
-
-        // Agregamos el campo de texto al panel de parámetros
-        panelParametros.add(new JLabel("Valor (int):"));
-        campoValor = new JTextField("25", 10); // Valor por defecto 50
-        panelParametros.add(campoValor);
-
+        scrollFiltros.setBorder(BorderFactory.createTitledBorder("CATEGORÍAS"));
         panelDerecho.add(scrollFiltros, BorderLayout.CENTER);
+
+        // Parámetros
+        panelParametros = new JPanel(new GridLayout(2, 1, 5, 5));
+        panelParametros.setBorder(BorderFactory.createCompoundBorder(
+                new EmptyBorder(10, 10, 10, 10),
+                BorderFactory.createTitledBorder("AJUSTES")
+        ));
+
+        JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        inputPanel.add(new JLabel("Intensidad:"));
+        campoValor = new JTextField("25", 8);
+        inputPanel.add(campoValor);
+
+        panelParametros.add(inputPanel);
         panelDerecho.add(panelParametros, BorderLayout.SOUTH);
+
         ventana.add(panelDerecho, BorderLayout.EAST);
 
-        // 3. ZONA INFERIOR: Controles Principales
-        panelControles = new JPanel();
-        panelControles.setLayout(new FlowLayout());
+        // --- ZONA INFERIOR: Barra de Acciones ---
+        panelControles = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        panelControles.setBackground(new Color(35, 35, 35));
 
-        JButton btnCargar = new JButton("Cargar");
+        JButton btnCargar = createStyledButton("Cargar Imagen", new Color(70, 130, 180));
         btnCargar.addActionListener(e -> cargarImagenBase());
 
-        JButton btnGuardar = new JButton("Guardar");
-        btnGuardar.addActionListener(e -> guardarImagen());
-
-        JButton btnMenuFiltros = new JButton("Filtros");
-        btnMenuFiltros.addActionListener(e -> {
+        JButton btnFiltros = createStyledButton("Filtros", new Color(60, 179, 113));
+        btnFiltros.addActionListener(e -> {
             panelDerecho.setVisible(!panelDerecho.isVisible());
-            ventana.revalidate(); // Refresca la interfaz para mostrar/ocultar el panel
+            ventana.revalidate();
         });
 
-        JButton btnRestaurar = new JButton("Imagen Original");
+        JButton btnRestaurar = createStyledButton("Restaurar Original", new Color(205, 92, 92));
         btnRestaurar.addActionListener(e -> {
             if (imagenOriginal != null) {
-                imagenModificada = imagenOriginal;
+                imagenModificada = copiarImagen(imagenOriginal);
                 actualizarVista(imagenModificada);
-            } else {
-                JOptionPane.showMessageDialog(ventana, "No hay ninguna imagen cargada para restaurar.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
             }
         });
+
+        JButton btnGuardar = createStyledButton("Guardar", new Color(100, 100, 100));
+        btnGuardar.addActionListener(e -> guardarImagen());
 
         panelControles.add(btnCargar);
-        panelControles.add(btnGuardar);
-        panelControles.add(btnMenuFiltros);
+        panelControles.add(btnFiltros);
         panelControles.add(btnRestaurar);
+        panelControles.add(btnGuardar);
         ventana.add(panelControles, BorderLayout.SOUTH);
 
-        // Categorias
-        agregarCategoria("Filtros ARGB", new String[]{"Gris", "Negativo", "Brillo", "Vidrio Esmerilado", "Desvanecimiento Circular", "Efecto Retro", "Blanco y Negro"});
-        agregarCategoria("Filtros HSV", new String[]{"Mas saturacion", "Menos saturacion", "Mas brillo", "Menos brillo", "Tonalidad"});
-        agregarCategoria("Convolucionales", new String[]{"Blur", "Sharpen o Enfoque", "Detección de Bordes", "Aclarar", "Obscurecer", "Relieve", "Realzar Bordes"});
-
-        ventana.addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentResized(java.awt.event.ComponentEvent e) {
-                if (imagenModificada != null) {
-                    actualizarVista(imagenModificada);
-                }
-            }
-        });
+        configurarCategorias();
 
         ventana.setLocationRelativeTo(null);
         ventana.setVisible(true);
     }
 
-    // --- NUEVO MÉTODO AUXILIAR PARA LEER EL PARÁMETRO ---
+    private JButton createStyledButton(String text, Color bg) {
+        JButton btn = new JButton(text);
+        btn.setBackground(bg);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setPreferredSize(new Dimension(150, 35));
+        btn.setFont(new Font("SansSerif", Font.BOLD, 12));
+        return btn;
+    }
+
+    private void configurarCategorias() {
+        agregarCategoria("Filtros ARGB", new String[]{"Gris", "Negativo", "Brillo", "Vidrio Esmerilado", "Desvanecimiento Circular", "Efecto Retro", "Blanco y Negro"});
+        agregarCategoria("Filtros HSV", new String[]{"Mas saturacion", "Menos saturacion", "Mas brillo", "Menos brillo", "Tonalidad"});
+        agregarCategoria("Convolucionales", new String[]{"Blur", "Sharpen o Enfoque", "Detección de Bordes", "Aclarar", "Obscurecer", "Relieve", "Realzar Bordes"});
+    }
+
     private int getValorInt() {
         try {
             return Integer.parseInt(campoValor.getText().trim());
         } catch (NumberFormatException e) {
-            // Si el usuario pone algo que no es un número, devolvemos un valor seguro
-            return 0;
+            return 25;
         }
     }
 
-    // Metodo auxiliar para crear las categorías colapsables o secciones
+    // --- CORRECCIÓN CLAVE PARA JPG ---
+    private void cargarImagenBase() {
+        JFileChooser selector = new JFileChooser();
+        selector.setFileFilter(new FileNameExtensionFilter("Imágenes (JPG, PNG)", "jpg", "jpeg", "png"));
+
+        if (selector.showOpenDialog(ventana) == JFileChooser.APPROVE_OPTION) {
+            try {
+                BufferedImage imgCargada = ImageIO.read(selector.getSelectedFile());
+
+                // Forzamos la imagen a TYPE_INT_ARGB para que sea compatible con todos los filtros
+                imagenOriginal = new BufferedImage(imgCargada.getWidth(), imgCargada.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = imagenOriginal.createGraphics();
+                g.drawImage(imgCargada, 0, 0, null);
+                g.dispose();
+
+                imagenModificada = copiarImagen(imagenOriginal);
+                actualizarVista(imagenModificada);
+                panelDerecho.setVisible(true);
+                ventana.revalidate();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(ventana, "Error al cargar JPG/PNG: " + ex.getMessage());
+            }
+        }
+    }
+
+    // Auxiliar para no modificar la original por referencia
+    private BufferedImage copiarImagen(BufferedImage bi) {
+        BufferedImage b = new BufferedImage(bi.getWidth(), bi.getHeight(), bi.getType());
+        Graphics g = b.getGraphics();
+        g.drawImage(bi, 0, 0, null);
+        g.dispose();
+        return b;
+    }
+
     private void agregarCategoria(String nombre, String[] filtros) {
-        // Botón de la Categoría
-        JButton btnCategoria = new JButton("▼ " + nombre);
-        btnCategoria.setAlignmentX(Component.LEFT_ALIGNMENT); // Alineación a la izquierda
-        btnCategoria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30)); // que ocupe todo el ancho
-        btnCategoria.setBorderPainted(false); // Opcional: para un look más limpio
-        btnCategoria.setContentAreaFilled(false);
-        btnCategoria.setHorizontalAlignment(SwingConstants.LEFT); // Texto del botón a la izquierda
+        JButton btnCat = new JButton(nombre + " ▼");
+        btnCat.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnCat.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        btnCat.setHorizontalAlignment(SwingConstants.LEFT);
+        btnCat.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         JPanel subPanel = new JPanel();
         subPanel.setLayout(new BoxLayout(subPanel, BoxLayout.Y_AXIS));
-        subPanel.setAlignmentX(Component.LEFT_ALIGNMENT); // Panel de filtros a la izquierda
-        subPanel.setVisible(true);
+        subPanel.setVisible(false);
 
         for (String f : filtros) {
-            JButton btnF = new JButton("   • " + f); // Espacio extra para simular jerarquía
-            btnF.setAlignmentX(Component.LEFT_ALIGNMENT); // Alineación a la izquierda
+            JButton btnF = new JButton("  " + f);
+            btnF.setAlignmentX(Component.LEFT_ALIGNMENT);
             btnF.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-            btnF.setBorderPainted(false);
+            btnF.setHorizontalAlignment(SwingConstants.LEFT);
             btnF.setContentAreaFilled(false);
-            btnF.setHorizontalAlignment(SwingConstants.LEFT); // Texto a la izquierda
 
-            //Funcionalidad de los botones en las categorias
-            if (f.equals("Gris")) {
-                btnF.addActionListener(e -> filtroGris());
-            } else if (f.equals("Brillo")) {
-                btnF.addActionListener(e -> filtroBrillo());
-            } else if (f.equals("Negativo")) {
-                btnF.addActionListener(e -> filtroNegativo());
-            } else if (f.equals("Vidrio Esmerilado")) {
-                btnF.addActionListener(e -> filtroVidrioEsmerilado());
-            } else if (f.equals("Desvanecimiento Circular")) {
-                btnF.addActionListener(e -> filtroDesvanecimientoCircular());
-            } else if (f.equals("Efecto Retro")) {
-                btnF.addActionListener(e -> filtroEfectoRetro());
-            } else if (f.equals("Blanco y Negro")) {
-                btnF.addActionListener(e -> filtroBlancoNegro());
-
-            // HSV
-            } else if (f.equals("Mas saturacion")) {
-                btnF.addActionListener(e -> filtroMasSaturacionHsv());
-            } else if (f.equals("Menos saturacion")) {
-                btnF.addActionListener(e -> filtroMenosSaturacionHsv());
-            } else if (f.equals("Mas brillo")) {
-                btnF.addActionListener(e -> filtroMasBrilloHsv());
-            } else if (f.equals("Menos brillo")) {
-                btnF.addActionListener(e -> filtroMenosBrilloHsv());
-            } else if (f.equals("Tonalidad")) {
-                btnF.addActionListener(e -> filtroTonalidadHsv());
-            }
-            // metodos Convolusionales
-            else if (f.equals("Blur")) {
-                btnF.addActionListener(e -> filtroBlurCv());
-            } else if (f.equals("Sharpen o Enfoque")) {
-                btnF.addActionListener(e -> filtroSharpenCv());
-            } else if (f.equals("Detección de Bordes")) {
-                btnF.addActionListener(e -> filtroDeteccionBordesCv());
-            } else if (f.equals("Aclarar")) {
-                btnF.addActionListener(e -> filtroAclararCv());
-            } else if (f.equals("Obscurecer")) {
-                btnF.addActionListener(e -> filtroObscurecerCv());
-            } else if (f.equals("Relieve")) {
-                btnF.addActionListener(e -> filtroRelieveCv());
-            } else if (f.equals("Realzar Bordes")) {
-                btnF.addActionListener(e -> filtroRealzarBordesCv());
-            }
-
+            btnF.addActionListener(e -> aplicarFiltro(f));
             subPanel.add(btnF);
         }
 
-        btnCategoria.addActionListener(e -> subPanel.setVisible(!subPanel.isVisible()));
-
-        panelListaFiltros.add(btnCategoria);
+        btnCat.addActionListener(e -> subPanel.setVisible(!subPanel.isVisible()));
+        panelListaFiltros.add(btnCat);
         panelListaFiltros.add(subPanel);
     }
 
-    // --- MÉTODOS PREVIOS ---
+    private void aplicarFiltro(String f) {
+        if (imagenModificada == null) return;
 
-    private void cargarImagenBase() {
-        JFileChooser selectorArchivos = new JFileChooser();
-        selectorArchivos.setDialogTitle("Selecciona una imagen");
-        FileNameExtensionFilter filtro = new FileNameExtensionFilter("Imágenes (PNG, JPG)", "png", "jpg", "jpeg");
-        selectorArchivos.setFileFilter(filtro);
+        int val = getValorInt();
 
-        int resultado = selectorArchivos.showOpenDialog(ventana);
-
-        if (resultado == JFileChooser.APPROVE_OPTION) {
-            File archivo = selectorArchivos.getSelectedFile();
-            try {
-                imagenOriginal = ImageIO.read(archivo);
-                imagenModificada = imagenOriginal;
-                actualizarVista(imagenModificada);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(ventana, "Error al leer la imagen: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
+        switch (f) {
+            case "Gris": imagenModificada = FiltrosARGB.filtroGris(imagenModificada); break;
+            case "Negativo": imagenModificada = FiltrosARGB.filtroNegativo(imagenModificada); break;
+            case "Brillo": imagenModificada = FiltrosARGB.filtroBrillo(imagenModificada, val); break;
+            case "Vidrio Esmerilado": imagenModificada = FiltrosARGB.filtroVidrioEsmerilado(imagenModificada); break;
+            case "Efecto Retro": imagenModificada = FiltrosARGB.filtroEfectoRetro(imagenModificada, val); break;
+            case "Desvanecimiento Circular": imagenModificada = FiltrosARGB.filtroDesvanecimientoCircular(imagenModificada); break;
+            case "Blanco y Negro": imagenModificada = FiltrosARGB.filtroBlancoNegro(imagenModificada); break;
+            case "Mas saturacion": imagenModificada = FiltrosBasicosHSV.masSaturacion(imagenModificada); break;
+            case "Menos saturacion": imagenModificada = FiltrosBasicosHSV.menosSaturacion(imagenModificada); break;
+            case "Mas brillo": imagenModificada = FiltrosBasicosHSV.masBrillo(imagenModificada); break;
+            case "Menos brillo": imagenModificada = FiltrosBasicosHSV.menosBrillo(imagenModificada); break;
+            case "Tonalidad": imagenModificada = FiltrosBasicosHSV.cambioTonalidad(imagenModificada); break;
+            case "Blur": imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Blur", imagenModificada); break;
+            case "Sharpen o Enfoque": imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Sharpen", imagenModificada); break;
+            case "Detección de Bordes": imagenModificada = FiltrosConvolucionales.filtroConvoluciones("DeteccionBordes", imagenModificada); break;
+            case "Aclarar": imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Aclarar", imagenModificada); break;
+            case "Obscurecer": imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Obscurecer", imagenModificada); break;
+            case "Relieve": imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Relieve", imagenModificada); break;
+            case "Realzar Bordes": imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Realzar Bordes", imagenModificada); break;
         }
+        actualizarVista(imagenModificada);
     }
 
     private void guardarImagen() {
         if (imagenModificada == null) {
-            JOptionPane.showMessageDialog(ventana, "No hay ninguna imagen para guardar", "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(ventana, "No hay imagen para guardar.");
             return;
         }
 
         JFileChooser selector = new JFileChooser();
         selector.setDialogTitle("Guardar Imagen");
 
-        // Filtros de extensión
+        // Filtros para que el usuario elija el formato en la ventana
         FileNameExtensionFilter filtroPng = new FileNameExtensionFilter("Imagen PNG (.png)", "png");
         FileNameExtensionFilter filtroJpg = new FileNameExtensionFilter("Imagen JPG (.jpg)", "jpg");
         selector.addChoosableFileFilter(filtroPng);
         selector.addChoosableFileFilter(filtroJpg);
         selector.setFileFilter(filtroPng); // PNG por defecto
 
-        int seleccion = selector.showSaveDialog(ventana);
-
-        if (seleccion == JFileChooser.APPROVE_OPTION) {
-            File archivoDestino = selector.getSelectedFile();
-            String ruta = archivoDestino.getAbsolutePath();
-
-            // Obtener la extensión seleccionada por el usuario en el combo box
-            String extension = "png"; // valor por defecto
-            if (selector.getFileFilter() == filtroJpg) extension = "jpg";
-
-            // Asegurarnos de que el archivo tenga la extensión correcta en el nombre
-            if (!ruta.toLowerCase().endsWith("." + extension)) {
-                archivoDestino = new File(ruta + "." + extension);
-            }
-
+        if (selector.showSaveDialog(ventana) == JFileChooser.APPROVE_OPTION) {
             try {
-                if (extension.equals("jpg")) {
-                    // Si es JPG, creamos una versión sin transparencia (RGB)
-                    BufferedImage imagenRGB = new BufferedImage(
+                File archivoDestino = selector.getSelectedFile();
+                String ruta = archivoDestino.getAbsolutePath().toLowerCase();
+
+                // Determinar qué formato eligió el usuario en el combo box
+                String formato = "png";
+                if (selector.getFileFilter() == filtroJpg) {
+                    formato = "jpg";
+                }
+
+                // Asegurar que el nombre del archivo tenga la extensión correcta
+                if (!ruta.endsWith("." + formato)) {
+                    archivoDestino = new File(archivoDestino.getAbsolutePath() + "." + formato);
+                }
+
+                if (formato.equals("jpg")) {
+                    // PASO CRÍTICO: Para JPG debemos remover la transparencia (ARGB -> RGB)
+                    BufferedImage jpgImage = new BufferedImage(
                             imagenModificada.getWidth(),
                             imagenModificada.getHeight(),
                             BufferedImage.TYPE_INT_RGB
                     );
-                    Graphics g = imagenRGB.getGraphics();
-                    g.drawImage(imagenModificada, 0, 0, null);
-                    g.dispose();
-                    ImageIO.write(imagenRGB, "jpg", archivoDestino);
+                    Graphics2D g2d = jpgImage.createGraphics();
+                    // Dibujamos un fondo blanco por si la imagen tenía partes transparentes
+                    g2d.setColor(Color.WHITE);
+                    g2d.fillRect(0, 0, jpgImage.getWidth(), jpgImage.getHeight());
+                    g2d.drawImage(imagenModificada, 0, 0, null);
+                    g2d.dispose();
+
+                    ImageIO.write(jpgImage, "jpg", archivoDestino);
                 } else {
-                    // Si es PNG, guardamos directamente el buffer modificado
+                    // Para PNG guardamos directo
                     ImageIO.write(imagenModificada, "png", archivoDestino);
                 }
-                JOptionPane.showMessageDialog(ventana, "Imagen guardada con éxito");
+
+                JOptionPane.showMessageDialog(ventana, "¡Imagen guardada como " + formato.toUpperCase() + "!");
             } catch (Exception ex) {
+                ex.printStackTrace();
                 JOptionPane.showMessageDialog(ventana, "Error al guardar: " + ex.getMessage());
             }
         }
     }
 
-    private void filtroGris() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosARGB.filtroGris(imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroNegativo() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosARGB.filtroNegativo(imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroBrillo() {
-        if (imagenModificada != null) {
-            // Leemos el valor del campo de texto
-            imagenModificada = FiltrosARGB.filtroBrillo(imagenModificada, getValorInt());
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroVidrioEsmerilado() {
-        if (imagenModificada != null) {
-            // Leemos el valor del campo de texto
-            imagenModificada = FiltrosARGB.filtroVidrioEsmerilado(imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroDesvanecimientoCircular() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosARGB.filtroDesvanecimientoCircular(imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroEfectoRetro() {
-        if (imagenModificada != null) {
-            // Leemos el valor del campo de texto
-            imagenModificada = FiltrosARGB.filtroEfectoRetro(imagenModificada, getValorInt());
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroBlancoNegro() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosARGB.filtroBlancoNegro(imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroMasSaturacionHsv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosBasicosHSV.masSaturacion(imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroMenosSaturacionHsv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosBasicosHSV.menosSaturacion(imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroMasBrilloHsv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosBasicosHSV.masBrillo(imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-    private void filtroMenosBrilloHsv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosBasicosHSV.menosBrillo(imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-    private void filtroTonalidadHsv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosBasicosHSV.cambioTonalidad(imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroBlurCv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Blur", imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroSharpenCv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Sharpen", imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroDeteccionBordesCv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("DeteccionBordes", imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroAclararCv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Aclarar", imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroObscurecerCv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Obscurecer", imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroRelieveCv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Relieve", imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-    private void filtroRealzarBordesCv() {
-        if (imagenModificada != null) {
-            imagenModificada = FiltrosConvolucionales.filtroConvoluciones("Realzar Bordes", imagenModificada);
-            actualizarVista(imagenModificada);
-        }
-    }
-
-
     private void actualizarVista(BufferedImage img) {
         if (img != null) {
             etiquetaImagen.setText("");
             int anchoOcupado = panelDerecho.isVisible() ? panelDerecho.getWidth() : 0;
-            int anchoCont = ventana.getContentPane().getWidth() - anchoOcupado;
-            int altoCont = ventana.getContentPane().getHeight() - panelControles.getHeight();
+            int anchoCont = ventana.getWidth() - anchoOcupado - 40;
+            int altoCont = ventana.getHeight() - panelControles.getHeight() - 80;
 
-            int nuevoAlto, nuevoAncho;
-            double arImg = (double) img.getWidth() / img.getHeight();
-            double arCont = (double) anchoCont / altoCont;
+            double ratio = Math.min((double) anchoCont / img.getWidth(), (double) altoCont / img.getHeight());
+            int nW = (int) (img.getWidth() * ratio);
+            int nH = (int) (img.getHeight() * ratio);
 
-            if (arImg > arCont) {
-                nuevoAncho = anchoCont;
-                nuevoAlto = (int) (anchoCont / arImg);
-            } else {
-                nuevoAlto = altoCont;
-                nuevoAncho = (int) (altoCont * arImg);
-            }
-
-            Image imgEscalada = img.getScaledInstance(nuevoAncho, nuevoAlto, Image.SCALE_SMOOTH);
-            etiquetaImagen.setIcon(new ImageIcon(imgEscalada));
-            ventana.revalidate();
-            ventana.repaint();
+            Image escalada = img.getScaledInstance(nW, nH, Image.SCALE_SMOOTH);
+            etiquetaImagen.setIcon(new ImageIcon(escalada));
         }
     }
 }
